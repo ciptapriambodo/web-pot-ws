@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Monitoring Potensiometer ESP32</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-950 text-white flex justify-center items-center h-screen">
+
+  <div class="bg-gray-900 p-10 rounded-2xl shadow-xl w-[500px] border border-gray-700">
+
+    <h1 class="text-2xl font-bold text-center mb-2">POTENTIOMETER</h1>
+    <p class="text-gray-400 text-center mb-8">Realtime Monitoring using ESP32 + Web + Node.js</p>
+
+    <!-- value -->
+    <div class="text-center mb-6">
+      <p class="text-gray-400 text-sm">ADC Value</p>
+      <h2 id="adcValue" class="text-5xl font-extrabold text-blue-400">0</h2>
+      <p class="text-gray-500 mt-2">Range: 0 - 4095</p>
+    </div>
+
+    <!-- progress bar -->
+    <div class="w-full bg-gray-800 rounded-full h-6 overflow-hidden mb-6">
+      <div id="bar"
+        class="h-6 bg-blue-500 w-0 transition-all duration-300">
+      </div>
+    </div>
+
+    <!-- persentase -->
+    <p class="text-center text-lg font-semibold">
+      Percentage: <span id="percent" class="text-green-400">0%</span>
+    </p>
+
+  </div>
+
+  <!-- Socket.IO client -->
+  <script src="/socket.io/socket.io.js"></script>
+
+  <script>
+    const socket = io();
+
+    const adcValue = document.getElementById("adcValue");
+    const bar = document.getElementById("bar");
+    const percentText = document.getElementById("percent");
+
+    socket.on("pot_update", (value) => {
+      if (value === "ERROR") {
+        adcValue.innerText = "ERR";
+        percentText.innerText = "ERROR";
+        bar.style.width = "0%";
+        bar.className = "h-6 bg-red-500 w-0 transition-all duration-300";
+        return;
+      }
+
+      const adc = parseInt(value);
+      const percent = Math.round((adc / 4095) * 100);
+
+      adcValue.innerText = adc;
+      percentText.innerText = percent + "%";
+
+      bar.style.width = percent + "%";
+      bar.className = "h-6 bg-blue-500 transition-all duration-300";
+    });
+  </script>
+
+</body>
+</html>
